@@ -11,6 +11,18 @@
         </title>
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <meta name="description" content="A dark, focused home for long-form stories.">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="{{ filled($title ?? null) ? $title.' - '.config('app.name', 'Novel Reader') : config('app.name', 'Novel Reader') }}">
+        <meta property="og:description" content="A dark, focused home for long-form stories.">
+        <meta property="og:image" content="{{ url('/brand/novel-reader-social.png') }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ filled($title ?? null) ? $title.' - '.config('app.name', 'Novel Reader') : config('app.name', 'Novel Reader') }}">
+        <meta name="twitter:description" content="A dark, focused home for long-form stories.">
+        <meta name="twitter:image" content="{{ url('/brand/novel-reader-social.png') }}">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,8 +35,8 @@
         <header class="sticky top-0 z-30 border-b border-zinc-200 bg-stone-50/90 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
                 <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-                    <span class="inline-flex size-9 items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                        <flux:icon.book-open variant="mini" />
+                    <span class="inline-flex size-9 items-center justify-center overflow-hidden rounded-md bg-zinc-950 text-white ring-1 ring-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:ring-zinc-700">
+                        <x-app-logo-icon class="size-8" />
                     </span>
                     {{ config('app.name', 'Novel Reader') }}
                 </a>

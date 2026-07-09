@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#09090B"/>
+  <path d="M0 512C158 455 298 459 420 524C559 598 730 599 891 512C1006 450 1098 440 1200 466V630H0V512Z" fill="#18181B"/>
+  <circle cx="978" cy="122" r="92" fill="#E7E5E4" opacity=".18"/>
+  <circle cx="944" cy="92" r="92" fill="#09090B"/>
+  <g transform="translate(112 126) scale(1.55)">
+    <rect width="256" height="256" rx="56" fill="#18181B"/>
+    <path d="M38 62.4C38 50 48.4 40.4 60.8 42C86.8 45.2 108 56 128 75.2C148 56 169.2 45.2 195.2 42C207.6 40.4 218 50 218 62.4V194.8C218 204.8 210.4 213.2 200.4 214.4C174 217.6 152 227.6 133.6 242.8C130.4 245.6 125.6 245.6 122.4 242.8C104 227.6 82 217.6 55.6 214.4C45.6 213.2 38 204.8 38 194.8V62.4Z" fill="#27272A"/>
+    <path d="M128 75.2V229.6" stroke="#FAFAFA" stroke-width="12" stroke-linecap="round"/>
+    <path d="M60.8 42C86.8 45.2 108 56 128 75.2V229.6C109.2 215.6 86.4 205.6 56.8 202C50.8 201.2 46.8 196.4 46.8 190.4V62.4C46.8 50 48.4 40.4 60.8 42Z" fill="#E7E5E4"/>
+    <path d="M195.2 42C169.2 45.2 148 56 128 75.2V229.6C146.8 215.6 169.6 205.6 199.2 202C205.2 201.2 209.2 196.4 209.2 190.4V62.4C209.2 50 207.6 40.4 195.2 42Z" fill="#A1A1AA"/>
+    <path d="M68.8 72C85.2 75.2 98.8 81.6 112 91.6M68.8 102.4C85.2 105.6 98.8 112 112 121.6M187.2 72C170.8 75.2 157.2 81.6 144 91.6M187.2 102.4C170.8 105.6 157.2 112 144 121.6" stroke="#27272A" stroke-width="8.8" stroke-linecap="round" opacity=".48"/>
+    <path d="M173.6 144.4C147.2 148.4 126 163.2 108.8 188.8" stroke="#FAFAFA" stroke-width="16" stroke-linecap="round" opacity=".72"/>
+    <path d="M183.2 137.6L196.8 124L202 142.4L220 147.6L206.4 161.2L211.6 179.2L193.2 174.4L179.6 188L174.4 169.6L156.4 164.4L170 150.8L164.8 132.8L183.2 137.6Z" fill="#FAFAFA"/>
+    <path d="M56.8 202C86 205.6 109.2 215.6 128 229.6C146.8 215.6 170 205.6 199.2 202" stroke="#27272A" stroke-width="9.6" stroke-linecap="round" opacity=".36"/>
+  </g>
+  <text x="560" y="260" fill="#FAFAFA" font-family="Instrument Sans, Segoe UI, Arial, sans-serif" font-size="86" font-weight="700">Novel Reader</text>
+  <text x="565" y="336" fill="#D4D4D8" font-family="Instrument Sans, Segoe UI, Arial, sans-serif" font-size="32">A focused home for long-form stories.</text>
+  <path d="M568 386H852" stroke="#E7E5E4" stroke-width="10" stroke-linecap="round"/>
+  <path d="M568 418H760" stroke="#A1A1AA" stroke-width="10" stroke-linecap="round"/>
+  <path d="M568 450H680" stroke="#52525B" stroke-width="10" stroke-linecap="round"/>
+</svg>

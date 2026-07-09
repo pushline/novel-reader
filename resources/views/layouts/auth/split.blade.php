@@ -8,10 +8,10 @@
             <div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-e dark:border-neutral-800">
                 <div class="absolute inset-0 bg-neutral-900"></div>
                 <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-medium" wire:navigate>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
+                    <span class="me-2 inline-flex size-10 items-center justify-center overflow-hidden rounded-md bg-zinc-100 text-zinc-950 ring-1 ring-white/10">
+                        <x-app-logo-icon class="size-9" />
                     </span>
-                    {{ config('app.name', 'Laravel') }}
+                    {{ config('app.name', 'Novel Reader') }}
                 </a>
 
                 @php
@@ -27,12 +27,11 @@
             </div>
             <div class="w-full lg:p-8">
                 <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
-                        <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                            <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
+                    <a href="{{ route('home') }}" class="z-20 inline-flex items-center justify-center gap-2 font-semibold text-zinc-950 dark:text-zinc-50 lg:hidden" wire:navigate>
+                        <span class="inline-flex size-9 items-center justify-center overflow-hidden rounded-md bg-zinc-950 text-white ring-1 ring-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:ring-zinc-700">
+                            <x-app-logo-icon class="size-8" />
                         </span>
-
-                        <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+                        <span>{{ config('app.name', 'Novel Reader') }}</span>
                     </a>
                     {{ $slot }}
                 </div>

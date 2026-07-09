@@ -56,8 +56,8 @@
 
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($stories as $story)
-                <a href="{{ route('stories.show', $story) }}" class="group grid min-h-72 overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-md hover:shadow-zinc-200/70 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:shadow-none">
-                    <div class="story-cover relative flex min-h-40 items-end justify-between gap-4 overflow-hidden p-5">
+                <a href="{{ route('stories.show', $story) }}" class="group flex overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:-translate-y-0.5 hover:border-zinc-400 hover:shadow-md hover:shadow-zinc-200/70 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:hover:shadow-none">
+                    <div class="story-cover relative hidden min-h-64 w-40 shrink-0 items-end justify-between gap-4 overflow-hidden p-4 md:flex">
                         @if ($story->cover_path)
                             <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="absolute inset-0 size-full object-cover object-bottom transition duration-300 group-hover:scale-105">
                             <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/25 to-transparent"></div>
@@ -66,8 +66,11 @@
                         @endif
                         <span class="relative z-10 rounded-sm bg-white/15 px-2 py-1 text-xs font-medium text-white backdrop-blur">{{ str($story->status)->headline() }}</span>
                     </div>
-                    <div class="flex flex-col p-5">
-                        <h2 class="text-lg font-semibold text-zinc-950 group-hover:underline dark:text-zinc-50">{{ $story->title }}</h2>
+                    <div class="flex min-w-0 flex-1 flex-col p-5">
+                        <div class="flex items-start justify-between gap-3 md:block">
+                            <h2 class="text-lg font-semibold text-zinc-950 group-hover:underline dark:text-zinc-50">{{ $story->title }}</h2>
+                            <span class="shrink-0 rounded-sm bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 md:hidden">{{ str($story->status)->headline() }}</span>
+                        </div>
                         <p class="mt-3 line-clamp-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{{ $story->description }}</p>
                         <div class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-zinc-500 dark:text-zinc-400">
                             <span class="inline-flex items-center gap-1">
