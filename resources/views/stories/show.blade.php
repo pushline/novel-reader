@@ -8,9 +8,9 @@
                 </a>
                 <div class="mt-6 grid gap-6 md:grid-cols-[96px_1fr] md:items-start">
                     @if ($story->cover_path)
-                        <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="aspect-[3/4] w-24 rounded-lg object-cover object-bottom shadow-sm">
+                        <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="aspect-3/4 w-24 rounded-lg object-cover object-bottom shadow-sm">
                     @else
-                        <div class="story-cover flex aspect-[3/4] items-end rounded-lg p-4 text-3xl font-semibold text-white shadow-sm">
+                        <div class="story-cover flex aspect-3/4 items-end rounded-lg p-4 text-3xl font-semibold text-white shadow-sm">
                             {{ str($story->title)->substr(0, 1) }}
                         </div>
                     @endif
@@ -25,13 +25,13 @@
                         <p class="mt-4 max-w-3xl leading-7 text-zinc-600 dark:text-zinc-300">{{ $story->description }}</p>
                         <div class="mt-6 flex flex-wrap gap-2">
                             @if ($progress?->chapter)
-                                <a href="{{ route('chapters.show', [$story, $progress->chapter->number]) }}" class="inline-flex h-10 items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950">
-                                    <flux:icon.play variant="micro" />
+                                <a href="{{ route('chapters.show', [$story, $progress->chapter->number]) }}" class="group inline-flex h-10 items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white shadow-sm shadow-zinc-950/15 transition duration-150 ease-out hover:-translate-y-px hover:bg-zinc-800 hover:shadow-md hover:shadow-zinc-950/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 active:bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 dark:shadow-black/30 dark:hover:bg-white dark:hover:shadow-black/40 dark:focus-visible:outline-zinc-300 dark:active:bg-zinc-200">
+                                    <flux:icon.play variant="micro" class="transition-transform duration-150 group-hover:scale-110" />
                                     {{ __('Continue') }} {{ $progress->scroll_percent }}%
                                 </a>
                             @elseif ($firstChapter)
-                                <a href="{{ route('chapters.show', [$story, $firstChapter->number]) }}" class="inline-flex h-10 items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950">
-                                    <flux:icon.play variant="micro" />
+                                <a href="{{ route('chapters.show', [$story, $firstChapter->number]) }}" class="group inline-flex h-10 items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white shadow-sm shadow-zinc-950/15 transition duration-150 ease-out hover:-translate-y-px hover:bg-zinc-800 hover:shadow-md hover:shadow-zinc-950/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 active:bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 dark:shadow-black/30 dark:hover:bg-white dark:hover:shadow-black/40 dark:focus-visible:outline-zinc-300 dark:active:bg-zinc-200">
+                                    <flux:icon.play variant="micro" class="transition-transform duration-150 group-hover:scale-110" />
                                     {{ __('Start reading') }}
                                 </a>
                             @endif
@@ -99,7 +99,7 @@
                             <flux:icon.link variant="micro" />
                             {{ __('Source') }}
                         </dt>
-                        <dd class="mt-1 break-words text-zinc-900 dark:text-zinc-100">{{ $story->source_url }}</dd>
+                        <dd class="mt-1 wrap-break-word text-zinc-900 dark:text-zinc-100">{{ $story->source_url }}</dd>
                     </div>
                 @endif
             </dl>

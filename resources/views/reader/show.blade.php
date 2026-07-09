@@ -21,30 +21,33 @@
                         <option value="{{ route('chapters.show', [$story, $option->number]) }}" @selected($option->id === $chapter->id)>{{ $option->number }}. {{ $option->title }}</option>
                     @endforeach
                 </select>
-                <button id="theme-toggle" type="button" class="inline-flex h-9 items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm hover:bg-white dark:border-zinc-700 dark:hover:bg-zinc-900">
+                <button id="theme-toggle" type="button" class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm transition duration-150 ease-out hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 dark:border-zinc-700 dark:hover:bg-zinc-900 dark:focus-visible:outline-zinc-300">
                     <flux:icon.sun variant="micro" class="hidden dark:inline-block" />
                     <flux:icon.moon variant="micro" class="dark:hidden" />
                     <span id="theme-toggle-label">{{ ($settings['theme'] ?? 'dark') === 'dark' ? __('Light') : __('Dark') }}</span>
                 </button>
                 @auth
-                    @if ($bookmarked)
-                        <form method="POST" action="{{ route('bookmarks.destroy', $chapter) }}">
-                            @csrf
+                    <a href="{{ route('dashboard') }}" class="inline-flex h-9 items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm text-zinc-900 transition duration-150 ease-out hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900 dark:focus-visible:outline-zinc-300">
+                        <flux:icon.sparkles variant="micro" />
+                        <span class="max-sm:hidden">{{ __('Dashboard') }}</span>
+                    </a>
+                    <form
+                        method="POST"
+                        action="{{ $bookmarked ? route('bookmarks.destroy', $chapter) : route('bookmarks.store', $chapter) }}"
+                        data-bookmark-form
+                        data-store-url="{{ route('bookmarks.store', $chapter) }}"
+                        data-destroy-url="{{ route('bookmarks.destroy', $chapter) }}"
+                        data-bookmarked="@json($bookmarked)"
+                    >
+                        @csrf
+                        @if ($bookmarked)
                             @method('DELETE')
-                            <button class="inline-flex h-9 items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
-                                <flux:icon.bookmark variant="micro" class="text-amber-500" />
-                                {{ __('Saved') }}
-                            </button>
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('bookmarks.store', $chapter) }}">
-                            @csrf
-                            <button class="inline-flex h-9 items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm dark:border-zinc-700">
-                                <flux:icon.bookmark variant="micro" />
-                                {{ __('Bookmark') }}
-                            </button>
-                        </form>
-                    @endif
+                        @endif
+                        <button type="submit" data-bookmark-button class="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm transition duration-150 ease-out hover:bg-white disabled:cursor-wait disabled:opacity-70 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                            <flux:icon.bookmark variant="micro" data-bookmark-icon @class(['text-amber-500' => $bookmarked]) />
+                            <span data-bookmark-label>{{ $bookmarked ? __('Saved') : __('Bookmark') }}</span>
+                        </button>
+                    </form>
                 @endauth
             </div>
         </header>
@@ -66,6 +69,25 @@
                         <span class="inline-flex items-center gap-1 rounded-sm bg-white px-2 py-1 dark:bg-zinc-900"><flux:icon.list-bullet variant="micro" /> {{ $chapters->count() }} {{ __('chapters') }}</span>
                     </div>
                 </div>
+                @if ($previous || $next)
+                    <nav class="grid gap-2 sm:grid-cols-2">
+                        @if ($previous)
+                            <a data-previous-chapter href="{{ route('chapters.show', [$story, $previous->number]) }}" class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 transition duration-150 ease-out hover:-translate-y-px hover:border-zinc-400 hover:bg-zinc-50 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:focus-visible:outline-zinc-300">
+                                <flux:icon.arrow-left variant="micro" />
+                                {{ __('Previous') }}
+                            </a>
+                        @else
+                            <span class="hidden sm:block"></span>
+                        @endif
+
+                        @if ($next)
+                            <a data-next-chapter href="{{ route('chapters.show', [$story, $next->number]) }}" class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-zinc-950 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-zinc-950/15 transition duration-150 ease-out hover:-translate-y-px hover:bg-zinc-800 hover:shadow-md hover:shadow-zinc-950/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 active:bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 dark:shadow-black/30 dark:hover:bg-white dark:hover:shadow-black/40 dark:focus-visible:outline-zinc-300 dark:active:bg-zinc-200">
+                                {{ __('Next') }}
+                                <flux:icon.arrow-right variant="micro" />
+                            </a>
+                        @endif
+                    </nav>
+                @endif
                 <div class="grid gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none sm:grid-cols-4">
                     <label class="grid gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                         <span class="inline-flex items-center gap-1.5">
@@ -117,7 +139,7 @@
 
             <nav class="mt-12 grid gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800 sm:grid-cols-2">
                 @if ($previous)
-                    <a id="previous-chapter" href="{{ route('chapters.show', [$story, $previous->number]) }}" class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md border border-zinc-300 px-4 py-2 text-sm hover:bg-white dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <a data-previous-chapter href="{{ route('chapters.show', [$story, $previous->number]) }}" class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md border border-zinc-300 px-4 py-2 text-sm hover:bg-white dark:border-zinc-700 dark:hover:bg-zinc-900">
                         <flux:icon.arrow-left variant="micro" />
                         {{ __('Previous') }}
                     </a>
@@ -125,7 +147,7 @@
                     <span class="hidden sm:block"></span>
                 @endif
                 @if ($next)
-                    <a id="next-chapter" href="{{ route('chapters.show', [$story, $next->number]) }}" class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-950">
+                    <a data-next-chapter href="{{ route('chapters.show', [$story, $next->number]) }}" class="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-950">
                         {{ __('Next') }}
                         <flux:icon.arrow-right variant="micro" />
                     </a>
@@ -146,6 +168,7 @@
                 const progressBar = document.getElementById('reader-progress-bar');
                 const themeToggle = document.getElementById('theme-toggle');
                 const themeToggleLabel = document.getElementById('theme-toggle-label');
+                const bookmarkForm = document.querySelector('[data-bookmark-form]');
                 const inputs = {
                     fontSize: document.getElementById('reader-font-size'),
                     lineHeight: document.getElementById('reader-line-height'),
@@ -184,10 +207,70 @@
                     });
                 });
 
+                if (bookmarkForm) {
+                    const button = bookmarkForm.querySelector('[data-bookmark-button]');
+                    const icon = bookmarkForm.querySelector('[data-bookmark-icon]');
+                    const label = bookmarkForm.querySelector('[data-bookmark-label]');
+
+                    const setBookmarkState = (bookmarked) => {
+                        bookmarkForm.dataset.bookmarked = bookmarked ? 'true' : 'false';
+                        bookmarkForm.action = bookmarked ? bookmarkForm.dataset.destroyUrl : bookmarkForm.dataset.storeUrl;
+                        label.textContent = bookmarked ? 'Saved' : 'Bookmark';
+                        icon.classList.toggle('text-amber-500', bookmarked);
+
+                        let method = bookmarkForm.querySelector('input[name="_method"]');
+
+                        if (bookmarked && !method) {
+                            method = document.createElement('input');
+                            method.type = 'hidden';
+                            method.name = '_method';
+                            bookmarkForm.appendChild(method);
+                        }
+
+                        if (method) {
+                            if (bookmarked) {
+                                method.value = 'DELETE';
+                            } else {
+                                method.remove();
+                            }
+                        }
+                    };
+
+                    bookmarkForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+
+                        if (button.disabled) return;
+
+                        button.disabled = true;
+
+                        try {
+                            const response = await fetch(bookmarkForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                                body: new FormData(bookmarkForm),
+                            });
+
+                            if (!response.ok) throw new Error('Bookmark request failed.');
+
+                            const data = await response.json();
+
+                            setBookmarkState(data.bookmarked);
+                        } catch (error) {
+                            console.error(error);
+                        } finally {
+                            button.disabled = false;
+                        }
+                    });
+                }
+
                 window.addEventListener('keydown', (event) => {
                     if (event.target.matches('input, select, textarea')) return;
-                    if (event.key === 'ArrowLeft') document.getElementById('previous-chapter')?.click();
-                    if (event.key === 'ArrowRight') document.getElementById('next-chapter')?.click();
+                    if (event.key === 'ArrowLeft') document.querySelector('[data-previous-chapter]')?.click();
+                    if (event.key === 'ArrowRight') document.querySelector('[data-next-chapter]')?.click();
                 });
 
                 window.addEventListener('scroll', () => {

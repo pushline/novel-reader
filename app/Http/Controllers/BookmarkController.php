@@ -14,12 +14,26 @@ class BookmarkController extends Controller
             ['note' => $request->string('note')->toString() ?: null]
         );
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'bookmarked' => true,
+                'message' => 'Bookmark saved.',
+            ]);
+        }
+
         return back()->with('status', 'Bookmark saved.');
     }
 
     public function destroy(Request $request, Chapter $chapter)
     {
         $request->user()->bookmarks()->where('chapter_id', $chapter->id)->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'bookmarked' => false,
+                'message' => 'Bookmark removed.',
+            ]);
+        }
 
         return back()->with('status', 'Bookmark removed.');
     }

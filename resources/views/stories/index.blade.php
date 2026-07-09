@@ -60,7 +60,7 @@
                     <div class="story-cover relative hidden min-h-64 w-40 shrink-0 items-end justify-between gap-4 overflow-hidden p-4 md:flex">
                         @if ($story->cover_path)
                             <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="absolute inset-0 size-full object-cover object-bottom transition duration-300 group-hover:scale-105">
-                            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/25 to-transparent"></div>
+                            <div class="absolute inset-0 bg-linear-to-t from-zinc-950/80 via-zinc-950/25 to-transparent"></div>
                         @else
                             <div class="relative z-10 text-3xl font-semibold text-white/95">{{ str($story->title)->substr(0, 1) }}</div>
                         @endif

@@ -69,6 +69,20 @@ it('saves bookmarks and reading progress for authenticated users', function () {
     expect(Bookmark::whereBelongsTo($user)->whereBelongsTo($chapter)->exists())->toBeTrue();
 
     $this->actingAs($user)
+        ->deleteJson(route('bookmarks.destroy', $chapter))
+        ->assertOk()
+        ->assertJson(['bookmarked' => false]);
+
+    expect(Bookmark::whereBelongsTo($user)->whereBelongsTo($chapter)->exists())->toBeFalse();
+
+    $this->actingAs($user)
+        ->postJson(route('bookmarks.store', $chapter))
+        ->assertOk()
+        ->assertJson(['bookmarked' => true]);
+
+    expect(Bookmark::whereBelongsTo($user)->whereBelongsTo($chapter)->exists())->toBeTrue();
+
+    $this->actingAs($user)
         ->postJson(route('progress.store', $chapter), ['scroll_percent' => 64])
         ->assertOk()
         ->assertJson(['saved' => true]);

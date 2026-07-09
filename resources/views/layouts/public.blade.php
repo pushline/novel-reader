@@ -41,30 +41,30 @@
                     {{ config('app.name', 'Novel Reader') }}
                 </a>
                 <nav class="flex items-center gap-1 text-sm text-zinc-600 dark:text-zinc-300 sm:gap-3">
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:text-zinc-950 dark:hover:text-white">
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 transition duration-150 ease-out hover:text-zinc-950 dark:hover:text-white">
                         <flux:icon.book-open variant="micro" />
                         <span class="max-sm:hidden">{{ __('Library') }}</span>
                     </a>
-                    <button id="public-theme-toggle" type="button" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:text-zinc-950 dark:hover:text-white">
+                    <button id="public-theme-toggle" type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 transition duration-150 ease-out hover:text-zinc-950 dark:hover:text-white">
                         <flux:icon.sun variant="micro" class="hidden dark:inline-block" />
                         <flux:icon.moon variant="micro" class="dark:hidden" />
                         <span id="public-theme-label" class="max-sm:hidden">{{ __('Light') }}</span>
                     </button>
                     @auth
-                        <a href="{{ route('library') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:text-zinc-950 dark:hover:text-white">
+                        <a href="{{ route('library') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 transition duration-150 ease-out hover:text-zinc-950 dark:hover:text-white">
                             <flux:icon.bookmark variant="micro" />
                             <span class="max-sm:hidden">{{ __('My library') }}</span>
                         </a>
-                        <a href="{{ route('settings') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:text-zinc-950 dark:hover:text-white">
+                        <a href="{{ route('settings') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 transition duration-150 ease-out hover:text-zinc-950 dark:hover:text-white">
                             <flux:icon.cog-6-tooth variant="micro" />
                             <span class="max-sm:hidden">{{ __('Settings') }}</span>
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 hover:text-zinc-950 dark:hover:text-white">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 transition duration-150 ease-out hover:-translate-y-px hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 dark:hover:text-white dark:focus-visible:outline-zinc-300">
                             <flux:icon.arrow-right-start-on-rectangle variant="micro" />
                             <span class="max-sm:hidden">{{ __('Log in') }}</span>
                         </a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-2 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-950">
+                        <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-2 text-white shadow-sm shadow-zinc-950/15 transition duration-150 ease-out hover:-translate-y-px hover:bg-zinc-700 hover:shadow-md hover:shadow-zinc-950/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 active:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:shadow-black/30 dark:hover:bg-white dark:hover:shadow-black/40 dark:focus-visible:outline-zinc-300 dark:active:bg-zinc-200">
                             <flux:icon.user-plus variant="micro" />
                             {{ __('Register') }}
                         </a>

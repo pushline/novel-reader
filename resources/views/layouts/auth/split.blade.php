@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div class="w-full lg:p-8">
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
                     <a href="{{ route('home') }}" class="z-20 inline-flex items-center justify-center gap-2 font-semibold text-zinc-950 dark:text-zinc-50 lg:hidden" wire:navigate>
                         <span class="inline-flex size-9 items-center justify-center overflow-hidden rounded-md bg-zinc-950 text-white ring-1 ring-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:ring-zinc-700">
                             <x-app-logo-icon class="size-8" />
