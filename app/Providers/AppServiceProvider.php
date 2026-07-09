@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Services\ChapterHtmlExtractors\ChapterHtmlExtractorManager;
 use App\Services\ChapterHtmlExtractors\NovelFullChapterHtmlExtractor;
+use App\Services\ChapterHtmlExtractors\NovelLunarChapterHtmlExtractor;
+use App\Services\ChapterHtmlExtractors\NovelTranslationChapterHtmlExtractor;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ChapterHtmlExtractorManager::class, fn ($app) => new ChapterHtmlExtractorManager([
             $app->make(NovelFullChapterHtmlExtractor::class),
+            $app->make(NovelLunarChapterHtmlExtractor::class),
+            $app->make(NovelTranslationChapterHtmlExtractor::class),
         ]));
     }
 

@@ -35,5 +35,27 @@ class StorySeeder extends Seeder
 
         $story->authors()->syncWithoutDetaching($author);
         $story->genres()->sync($genres->pluck('id')->all());
+
+        $assassin = Story::updateOrCreate(
+            ['slug' => 'the-reincarnated-assassin-is-a-genius-swordsman'],
+            [
+                'title' => 'The Reincarnated Assassin Is a Genius Swordsman',
+                'description' => 'The Reincarnated Assassin is a Genius Swordsman follows Raon, a brainwashed assassin who was treated like a dog by the ruthless House Robert. After being betrayed and killed, he is reincarnated into the formidable Zieghart family as the grandson of the legendary "Destructive King".',
+                'cover_path' => 'covers/the-reincarnated-assassin-is-a-genius-swordsman.webp',
+                'status' => 'ongoing',
+                'source_url' => 'https://novellunar.com/novel/the-reincarnated-assassin-is-a-genius-swordsman',
+                'metadata' => ['source' => 'authorized-import'],
+            ],
+        );
+
+        $assassinAuthor = Author::firstOrCreate(['slug' => 'voke-geulgaemi'], ['name' => 'VOKE (GeulGaemi)']);
+        $assassinGenres = collect(['Action', 'Fantasy', 'Reincarnation'])
+            ->map(fn (string $name) => Genre::firstOrCreate(
+                ['slug' => str($name)->slug()],
+                ['name' => $name],
+            ));
+
+        $assassin->authors()->syncWithoutDetaching($assassinAuthor);
+        $assassin->genres()->sync($assassinGenres->pluck('id')->all());
     }
 }
