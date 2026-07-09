@@ -9,7 +9,7 @@
                 <div class="mt-6 grid justify-items-center gap-6 text-center md:grid-cols-[256px_1fr] md:items-start md:justify-items-start md:text-left lg:items-stretch">
                     @if ($story->cover_path)
                         <div class="relative aspect-3/4 w-56 overflow-hidden rounded-lg bg-zinc-100 shadow-sm dark:bg-zinc-800 md:w-64">
-                            <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="absolute inset-0 size-full object-cover object-bottom">
+                            <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="absolute inset-0 size-full object-bottom">
                         </div>
                     @else
                         <div class="story-cover flex aspect-3/4 w-56 items-end rounded-lg p-4 text-3xl font-semibold text-white shadow-sm md:w-64">
