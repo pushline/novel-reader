@@ -97,6 +97,11 @@
                             <option value="serif" @selected($settings['fontFamily'] === 'serif')>Serif</option>
                             <option value="sans" @selected($settings['fontFamily'] === 'sans')>Sans</option>
                             <option value="mono" @selected($settings['fontFamily'] === 'mono')>Mono</option>
+                            <option value="open-sans" @selected($settings['fontFamily'] === 'open-sans')>Open Sans</option>
+                            <option value="google-sans" @selected($settings['fontFamily'] === 'google-sans')>Google Sans</option>
+                            <option value="roboto" @selected($settings['fontFamily'] === 'roboto')>Roboto</option>
+                            <option value="montserrat" @selected($settings['fontFamily'] === 'montserrat')>Montserrat</option>
+                            <option value="nunito" @selected($settings['fontFamily'] === 'nunito')>Nunito</option>
                         </select>
                     </label>
                 </div>
@@ -155,7 +160,7 @@
                     shell.style.maxWidth = `${state.contentWidth}px`;
                     content.style.fontSize = `${state.fontSize}px`;
                     content.style.lineHeight = state.lineHeight;
-                    content.classList.remove('font-serif', 'font-sans', 'font-mono');
+                    content.classList.remove('font-serif', 'font-sans', 'font-mono', 'font-open-sans', 'font-google-sans', 'font-roboto', 'font-montserrat', 'font-nunito');
                     content.classList.add(`font-${state.fontFamily || 'serif'}`);
 
                     Object.entries(inputs).forEach(([key, input]) => {

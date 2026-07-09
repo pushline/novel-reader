@@ -9,7 +9,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-instrument-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     --font-open-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
     --font-google-sans: 'Google Sans', ui-sans-serif, system-ui, sans-serif;

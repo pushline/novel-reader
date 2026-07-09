@@ -30,7 +30,7 @@ new #[Title('Appearance settings')] class extends Component {
         $validated = $this->validate([
             'theme_preference' => ['required', 'in:light,dark'],
             'reader_font_size' => ['required', 'integer', 'min:16', 'max:24'],
-            'reader_font_family' => ['required', 'in:serif,sans,mono'],
+            'reader_font_family' => ['required', 'in:serif,sans,mono,open-sans,google-sans,roboto,montserrat,nunito'],
             'reader_line_height' => ['required', 'numeric', 'min:1.45', 'max:2.1'],
             'reader_content_width' => ['required', 'integer', 'min:620', 'max:980'],
         ]);
@@ -59,6 +59,11 @@ new #[Title('Appearance settings')] class extends Component {
                     <flux:select.option value="serif">{{ __('Serif') }}</flux:select.option>
                     <flux:select.option value="sans">{{ __('Sans') }}</flux:select.option>
                     <flux:select.option value="mono">{{ __('Mono') }}</flux:select.option>
+                    <flux:select.option value="open-sans">{{ __('Open Sans') }}</flux:select.option>
+                    <flux:select.option value="google-sans">{{ __('Google Sans') }}</flux:select.option>
+                    <flux:select.option value="roboto">{{ __('Roboto') }}</flux:select.option>
+                    <flux:select.option value="montserrat">{{ __('Montserrat') }}</flux:select.option>
+                    <flux:select.option value="nunito">{{ __('Nunito') }}</flux:select.option>
                 </flux:select>
                 <flux:error name="reader_font_family" />
             </flux:field>
