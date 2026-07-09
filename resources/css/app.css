@@ -1,0 +1,125 @@
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-zinc-50: #fafafa;
+    --color-zinc-100: #f5f5f5;
+    --color-zinc-200: #e5e5e5;
+    --color-zinc-300: #d4d4d4;
+    --color-zinc-400: #a3a3a3;
+    --color-zinc-500: #737373;
+    --color-zinc-600: #525252;
+    --color-zinc-700: #404040;
+    --color-zinc-800: #262626;
+    --color-zinc-900: #171717;
+    --color-zinc-950: #0a0a0a;
+
+    --color-accent: var(--color-neutral-800);
+    --color-accent-content: var(--color-neutral-800);
+    --color-accent-foreground: var(--color-white);
+}
+
+@layer theme {
+    .dark {
+        --color-accent: var(--color-white);
+        --color-accent-content: var(--color-white);
+        --color-accent-foreground: var(--color-neutral-800);
+    }
+}
+
+@layer base {
+
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+[data-flux-field]:not(ui-radio, ui-checkbox) {
+    @apply grid gap-2;
+}
+
+[data-flux-label] {
+    @apply  !mb-0 !leading-tight;
+}
+
+input:focus[data-flux-control],
+textarea:focus[data-flux-control],
+select:focus[data-flux-control] {
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+}
+
+.reader-hero {
+    background:
+        linear-gradient(135deg, rgb(16 185 129 / 0.10), transparent 42%),
+        linear-gradient(315deg, rgb(14 165 233 / 0.08), transparent 46%),
+        var(--color-white);
+}
+
+.dark .reader-hero {
+    background:
+        linear-gradient(135deg, rgb(16 185 129 / 0.14), transparent 42%),
+        linear-gradient(315deg, rgb(14 165 233 / 0.10), transparent 46%),
+        var(--color-zinc-900);
+}
+
+.story-cover {
+    background:
+        linear-gradient(135deg, rgb(15 23 42 / 0.82), rgb(21 128 61 / 0.72)),
+        linear-gradient(45deg, #0f172a, #0369a1);
+}
+
+.reader-content {
+    @apply text-zinc-800 dark:text-zinc-200;
+    text-wrap: pretty;
+}
+
+.reader-content p {
+    @apply mb-6;
+}
+
+.reader-content p:first-of-type::first-letter {
+    @apply float-left mr-3 text-6xl font-semibold leading-none text-zinc-950 dark:text-zinc-50;
+}
+
+.reader-content h2,
+.reader-content h3,
+.reader-content h4 {
+    @apply mt-10 mb-4 font-semibold text-zinc-950 dark:text-zinc-50;
+}
+
+.reader-content h2 {
+    @apply text-2xl;
+}
+
+.reader-content h3 {
+    @apply text-xl;
+}
+
+.reader-content blockquote {
+    @apply my-6 border-l-4 border-zinc-300 pl-4 text-zinc-600 italic dark:border-zinc-700 dark:text-zinc-300;
+}
+
+.reader-content hr {
+    @apply my-10 border-zinc-300 dark:border-zinc-700;
+}
+
+.reader-content a {
+    @apply underline underline-offset-4;
+}
+
+/* \[:where(&)\]:size-4 {
+    @apply size-4;
+} */
