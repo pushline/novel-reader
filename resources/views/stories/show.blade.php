@@ -6,24 +6,28 @@
                     <flux:icon.arrow-left variant="micro" />
                     {{ __('Library') }}
                 </a>
-                <div class="mt-6 grid gap-6 md:grid-cols-[96px_1fr] md:items-start">
+                <div class="mt-6 grid justify-items-center gap-6 text-center md:grid-cols-[256px_1fr] md:items-start md:justify-items-start md:text-left lg:items-stretch">
                     @if ($story->cover_path)
-                        <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="aspect-3/4 w-24 rounded-lg object-cover object-bottom shadow-sm">
+                        <div class="relative aspect-3/4 w-56 overflow-hidden rounded-lg bg-zinc-100 shadow-sm dark:bg-zinc-800 md:w-64">
+                            <img src="{{ str($story->cover_path)->startsWith(['http://', 'https://', '/']) ? $story->cover_path : asset($story->cover_path) }}" alt="" class="absolute inset-0 size-full object-cover object-bottom">
+                        </div>
                     @else
-                        <div class="story-cover flex aspect-3/4 items-end rounded-lg p-4 text-3xl font-semibold text-white shadow-sm">
+                        <div class="story-cover flex aspect-3/4 w-56 items-end rounded-lg p-4 text-3xl font-semibold text-white shadow-sm md:w-64">
                             {{ str($story->title)->substr(0, 1) }}
                         </div>
                     @endif
-                    <div>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="rounded-sm bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{{ str($story->status)->headline() }}</span>
-                            @foreach ($story->genres as $genre)
-                                <span class="rounded-sm border border-zinc-200 px-2 py-1 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">{{ $genre->name }}</span>
-                            @endforeach
+                    <div class="flex flex-col items-center md:items-start lg:justify-between">
+                        <div>
+                            <div class="flex flex-wrap justify-center gap-2 md:justify-start">
+                                <span class="rounded-sm bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{{ str($story->status)->headline() }}</span>
+                                @foreach ($story->genres as $genre)
+                                    <span class="rounded-sm border border-zinc-200 px-2 py-1 text-xs text-zinc-600 dark:border-zinc-700 dark:text-zinc-300">{{ $genre->name }}</span>
+                                @endforeach
+                            </div>
+                            <h1 class="mt-3 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{{ $story->title }}</h1>
+                            <p class="mt-4 max-w-3xl leading-7 text-zinc-600 dark:text-zinc-300">{{ $story->description }}</p>
                         </div>
-                        <h1 class="mt-3 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">{{ $story->title }}</h1>
-                        <p class="mt-4 max-w-3xl leading-7 text-zinc-600 dark:text-zinc-300">{{ $story->description }}</p>
-                        <div class="mt-6 flex flex-wrap gap-2">
+                        <div class="mt-6 flex flex-wrap justify-center gap-2 md:justify-start">
                             @if ($progress?->chapter)
                                 <a href="{{ route('chapters.show', [$story, $progress->chapter->number]) }}" class="group inline-flex h-10 items-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-medium text-white shadow-sm shadow-zinc-950/15 transition duration-150 ease-out hover:-translate-y-px hover:bg-zinc-800 hover:shadow-md hover:shadow-zinc-950/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 active:translate-y-0 active:bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 dark:shadow-black/30 dark:hover:bg-white dark:hover:shadow-black/40 dark:focus-visible:outline-zinc-300 dark:active:bg-zinc-200">
                                     <flux:icon.play variant="micro" class="transition-transform duration-150 group-hover:scale-110" />
@@ -52,7 +56,7 @@
                 @foreach ($chapters as $chapter)
                     <a href="{{ route('chapters.show', [$story, $chapter->number]) }}" class="group flex items-center justify-between gap-4 border-b border-zinc-100 px-4 py-3 text-sm last:border-b-0 hover:bg-stone-50 dark:border-zinc-800 dark:hover:bg-zinc-800">
                         <span class="min-w-0">
-                            <span class="mr-3 inline-flex size-7 items-center justify-center rounded-sm bg-zinc-100 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{{ $chapter->number }}</span>
+                            <span class="mr-3 inline-flex size-8 items-center justify-center rounded-sm bg-zinc-100 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{{ $chapter->number }}</span>
                             <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $chapter->title }}</span>
                         </span>
                         <span class="flex items-center gap-3">
@@ -63,7 +67,11 @@
                 @endforeach
             </div>
 
-            {{ $chapters->links() }}
+            @if ($chapters->hasPages())
+                <div class="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    {{ $chapters->links() }}
+                </div>
+            @endif
         </section>
 
         <aside class="h-fit rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:sticky lg:top-24">
