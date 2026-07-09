@@ -28,6 +28,13 @@ class StoryController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'count' => number_format($stories->total()),
+                'html' => view('stories.partials.list', ['stories' => $stories])->render(),
+            ]);
+        }
+
         return view('stories.index', [
             'stories' => $stories,
             'genres' => Genre::query()->orderBy('name')->get(),
