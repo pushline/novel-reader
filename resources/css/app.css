@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import '../../vendor/livewire/flux/dist/flux.css';
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -9,13 +9,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-instrument-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-open-sans: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-google-sans: 'Google Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-roboto: 'Roboto', ui-sans-serif, system-ui, sans-serif;
-    --font-montserrat: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
-    --font-nunito: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+    --font-sans:
+        "Montserrat", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-instrument-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-open-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-google-sans: "Google Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-roboto: "Roboto", ui-sans-serif, system-ui, sans-serif;
+    --font-montserrat: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+    --font-nunito: "Nunito", ui-sans-serif, system-ui, sans-serif;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -43,7 +46,6 @@
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
@@ -58,7 +60,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -69,7 +71,7 @@ select:focus[data-flux-control] {
 
 .reader-hero {
     background:
-        linear-gradient(135deg, rgb(16 185 129 / 0.10), transparent 42%),
+        linear-gradient(135deg, rgb(16 185 129 / 0.1), transparent 42%),
         linear-gradient(315deg, rgb(14 165 233 / 0.08), transparent 46%),
         var(--color-white);
 }
@@ -77,7 +79,7 @@ select:focus[data-flux-control] {
 .dark .reader-hero {
     background:
         linear-gradient(135deg, rgb(16 185 129 / 0.14), transparent 42%),
-        linear-gradient(315deg, rgb(14 165 233 / 0.10), transparent 46%),
+        linear-gradient(315deg, rgb(14 165 233 / 0.1), transparent 46%),
         var(--color-zinc-900);
 }
 
@@ -94,10 +96,6 @@ select:focus[data-flux-control] {
 
 .reader-content p {
     @apply mb-6;
-}
-
-.reader-content p:first-of-type::first-letter {
-    @apply float-left mr-3 text-6xl font-semibold leading-none text-zinc-950 dark:text-zinc-50;
 }
 
 .reader-content h2,
