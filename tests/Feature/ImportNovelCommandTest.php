@@ -4,18 +4,9 @@ use App\Models\Chapter;
 use App\Models\Story;
 use Illuminate\Support\Facades\Http;
 
-it('refuses to import without authorization confirmation', function () {
-    $this->artisan('novels:import-from-url-pattern', [
-        '--story-slug' => 'overgeared',
-        '--url-pattern' => 'https://example.com/chapter-{chapter}.html',
-        '--start' => 1,
-        '--end' => 1,
-    ])->assertExitCode(1);
-});
-
-it('imports authorized chapter html from a url pattern', function () {
+it('imports chapter html from a url pattern', function () {
     Http::fake([
-        'example.com/*' => Http::response(<<<'HTML'
+        'novelfull.com/*' => Http::response(<<<'HTML'
             <html>
                 <body>
                     <h1>1 . Overgeared</h1>
@@ -31,10 +22,9 @@ it('imports authorized chapter html from a url pattern', function () {
     ]);
 
     $this->artisan('novels:import-from-url-pattern', [
-        '--authorized' => true,
         '--story-slug' => 'overgeared',
         '--title' => 'Overgeared',
-        '--url-pattern' => 'https://example.com/chapter-{chapter}.html',
+        '--url-pattern' => 'https://novelfull.com/overgeared/chapter-{chapter}.html',
         '--start' => 1,
         '--end' => 1,
         '--delay-ms' => 0,
@@ -49,4 +39,19 @@ it('imports authorized chapter html from a url pattern', function () {
         ->and($chapter->content)->not->toContain('iframe')
         ->and($chapter->content)->not->toContain('Buy now')
         ->and($chapter->content)->not->toContain('onclick');
+});
+
+it('does not fetch unsupported source hosts', function () {
+    Http::fake();
+
+    $this->artisan('novels:import-from-url-pattern', [
+        '--story-slug' => 'overgeared',
+        '--title' => 'Overgeared',
+        '--url-pattern' => 'https://example.com/chapter-{chapter}.html',
+        '--start' => 1,
+        '--end' => 1,
+        '--delay-ms' => 0,
+    ])->assertExitCode(0);
+
+    Http::assertNothingSent();
 });

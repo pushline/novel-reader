@@ -4,13 +4,13 @@ namespace App\Console\Commands;
 
 use App\Models\Chapter;
 use App\Models\Story;
-use App\Services\ChapterHtmlExtractor;
+use App\Services\ChapterHtmlExtractors\ChapterHtmlExtractorManager;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-#[Description('Import authorized novel chapters from a numbered URL pattern.')]
+#[Description('Import novel chapters from a numbered URL pattern.')]
 class ImportNovelFromUrlPattern extends Command
 {
     protected $signature = 'novels:import-from-url-pattern
@@ -23,7 +23,6 @@ class ImportNovelFromUrlPattern extends Command
         {--timeout-seconds=60 : Per-request timeout}
         {--retries=5 : HTTP attempts per chapter}
         {--retry-delay-ms=2000 : Delay between retry attempts}
-        {--authorized : Confirm you have permission to republish the content}
         {--dry-run : Fetch and parse without saving}
         {--only-missing : Skip chapters that already exist}
         {--force : Update even when the import hash is unchanged}';
@@ -31,14 +30,8 @@ class ImportNovelFromUrlPattern extends Command
     /**
      * Execute the console command.
      */
-    public function handle(ChapterHtmlExtractor $extractor): int
+    public function handle(ChapterHtmlExtractorManager $extractors): int
     {
-        if (! $this->option('authorized')) {
-            $this->error('Refusing to import without --authorized.');
-
-            return self::FAILURE;
-        }
-
         $slug = (string) $this->option('story-slug');
         $title = (string) $this->option('title');
         $pattern = (string) $this->option('url-pattern');
@@ -72,23 +65,33 @@ class ImportNovelFromUrlPattern extends Command
 
             if ($onlyMissing && $existing) {
                 $this->line("Chapter {$number}: skip existing");
+
                 continue;
             }
 
             $url = str_replace('{chapter}', (string) $number, $pattern);
 
             try {
+                if (! $extractors->supports($url)) {
+                    $host = parse_url($url, PHP_URL_HOST) ?: 'unknown host';
+
+                    $this->error("Chapter {$number}: unsupported source host {$host}");
+
+                    continue;
+                }
+
                 $response = Http::retry($retries, $retryDelayMs)
                     ->connectTimeout(20)
                     ->timeout($timeoutSeconds)
                     ->get($url)
                     ->throw();
 
-                $data = $extractor->extract($response->body());
+                $data = $extractors->extract($url, $response->body());
                 $hash = hash('sha256', $data['content']);
 
                 if ($existing && $existing->import_hash === $hash && ! $force) {
                     $this->line("Chapter {$number}: skip unchanged");
+
                     continue;
                 }
 
@@ -103,6 +106,7 @@ class ImportNovelFromUrlPattern extends Command
 
                 if ($dryRun) {
                     $this->info("Chapter {$number}: dry-run ok ({$payload['word_count']} words)");
+
                     continue;
                 }
 

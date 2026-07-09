@@ -1,13 +1,22 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ChapterHtmlExtractors;
 
+use App\Services\ChapterHtmlSanitizer;
 use Symfony\Component\DomCrawler\Crawler;
 
-class ChapterHtmlExtractor
+class NovelFullChapterHtmlExtractor implements ChapterHtmlExtractor
 {
-    public function __construct(private readonly ChapterHtmlSanitizer $sanitizer)
+    private const SUPPORTED_HOSTS = [
+        'novelfull.com',
+        '*.novelfull.com',
+    ];
+
+    public function __construct(private readonly ChapterHtmlSanitizer $sanitizer) {}
+
+    public function supports(string $url): bool
     {
+        return SupportedHostPatterns::matches($url, self::SUPPORTED_HOSTS);
     }
 
     /**
