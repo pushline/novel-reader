@@ -10,7 +10,7 @@ class ReaderController extends Controller
     public function show(Request $request, Story $story, int $chapter)
     {
         $chapterModel = $story->chapters()->where('number', $chapter)->firstOrFail();
-        $previous = $story->chapters()->where('number', '<', $chapter)->orderByDesc('number')->first();
+        $previous = $story->chapters()->where('number', '<', $chapter)->reorder('number', 'desc')->first();
         $next = $story->chapters()->where('number', '>', $chapter)->orderBy('number')->first();
         $chapters = $story->chapters()->select(['id', 'number', 'title'])->get();
 
