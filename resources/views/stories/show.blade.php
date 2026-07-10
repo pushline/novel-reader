@@ -51,12 +51,21 @@
             <div id="chapters" class="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
                 <div class="flex items-center justify-between gap-4 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
                     <h2 class="font-semibold text-zinc-950 dark:text-zinc-50">{{ __('Chapters') }}</h2>
-                    <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ trans_choice(':count entry|:count entries', $chapterCount) }}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-zinc-500 dark:text-zinc-400">{{ trans_choice(':count entry|:count entries', $chapterCount) }}</span>
+                        <a href="{{ route('stories.show', [$story, 'sort' => $sort === 'asc' ? 'desc' : 'asc']) }}#chapters" title="{{ $sort === 'asc' ? __('Sort descending') : __('Sort ascending') }}" class="inline-flex size-8 items-center justify-center rounded-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+                            @if ($sort === 'asc')
+                                <flux:icon.bars-arrow-down variant="micro" />
+                            @else
+                                <flux:icon.bars-arrow-up variant="micro" />
+                            @endif
+                        </a>
+                    </div>
                 </div>
                 @foreach ($chapters as $chapter)
                     <a href="{{ route('chapters.show', [$story, $chapter->number]) }}" class="group flex items-center justify-between gap-4 border-b border-zinc-100 px-4 py-3 text-sm last:border-b-0 hover:bg-stone-50 dark:border-zinc-800 dark:hover:bg-zinc-800">
                         <span class="min-w-0">
-                            <span class="mr-3 inline-flex size-8 items-center justify-center rounded-sm bg-zinc-100 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{{ $chapter->number }}</span>
+                            <span class="mr-2 inline-flex w-9 h-7 items-center justify-center rounded-sm bg-zinc-100 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{{ $chapter->number }}</span>
                             <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ $chapter->title }}</span>
                         </span>
                         <span class="flex items-center gap-3">

@@ -41,21 +41,24 @@ class StoryController extends Controller
         ]);
     }
 
-    public function show(Story $story)
+    public function show(Request $request, Story $story)
     {
         $story->load(['authors', 'genres']);
         $firstChapter = $story->chapters()->first();
-        $progress = request()->user()
-            ? request()->user()->readingProgress()->where('story_id', $story->id)->with('chapter')->first()
+        $progress = $request->user()
+            ? $request->user()->readingProgress()->where('story_id', $story->id)->with('chapter')->first()
             : null;
+
+        $sort = $request->string('sort')->lower()->value() === 'desc' ? 'desc' : 'asc';
 
         return view('stories.show', [
             'story' => $story,
-            'chapters' => $story->chapters()->paginate(50),
+            'chapters' => $story->chapters()->reorder('number', $sort)->paginate(50)->withQueryString(),
             'chapterCount' => $story->chapters()->count(),
             'firstChapter' => $firstChapter,
             'progress' => $progress,
             'totalWords' => $story->chapters()->sum('word_count'),
+            'sort' => $sort,
         ]);
     }
 }
