@@ -1,9 +1,18 @@
 import {
     defineConfig
 } from 'vite';
+import { networkInterfaces } from 'node:os';
 import laravel from 'laravel-vite-plugin';
 import { bunny, google } from 'laravel-vite-plugin/fonts';
 import tailwindcss from "@tailwindcss/vite";
+
+const lanHost = Object.values(networkInterfaces())
+    .flat()
+    .find((address) =>
+        address?.family === 'IPv4'
+        && !address.internal
+        && /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(address.address)
+    )?.address ?? 'localhost';
 
 export default defineConfig({
     plugins: [
@@ -37,6 +46,11 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        host: '0.0.0.0',
+        origin: `http://${lanHost}:5173`,
+        hmr: {
+            host: lanHost,
+        },
         cors: true,
         watch: {
             ignored: ['**/storage/framework/views/**'],
