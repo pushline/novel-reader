@@ -36,7 +36,11 @@ The importer currently supports:
 
 Unsupported hosts are rejected before any HTTP request is sent.
 
-The NovelFull extractor extracts the `#chapter-content` element, reads a best-effort title from `h1`, `.chapter-title`, or `.chapter h2`, and then sanitizes the HTML. The other extractors follow the same pattern with source-specific selectors.
+The NovelFull extractor extracts the `#chapter-content` element, reads a best-effort title from `h1`, `.chapter-title`, or `.chapter h2`, and then sanitizes the HTML.
+
+The NovelLunar extractor extracts the `article > div` element and reads a best-effort title from `h1, .chapter-title`.
+
+The NovelTranslation extractor extracts the `.chapter-content` element and strips a leading "Chapter N" label that the source always prefixes to the body; it does not extract a title (chapter titles are set to `null`).
 
 ## Adding Another Source
 
