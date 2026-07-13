@@ -25,20 +25,18 @@ Useful options:
 
 ## Supported Sources
 
-The importer currently supports NovelFull only:
+The importer currently supports:
 
-- `novelfull.com`
-- subdomains such as `www.novelfull.com`
+- **NovelFull** — `novelfull.com` and subdomains such as `www.novelfull.com`
+  (`app/Services/ChapterHtmlExtractors/NovelFullChapterHtmlExtractor.php`)
+- **NovelLunar** — `novellunar.com` and subdomains
+  (`app/Services/ChapterHtmlExtractors/NovelLunarChapterHtmlExtractor.php`)
+- **NovelTranslation** — `noveltranslation.net` and subdomains
+  (`app/Services/ChapterHtmlExtractors/NovelTranslationChapterHtmlExtractor.php`)
 
 Unsupported hosts are rejected before any HTTP request is sent.
 
-NovelFull extraction lives in:
-
-```text
-app/Services/ChapterHtmlExtractors/NovelFullChapterHtmlExtractor.php
-```
-
-It extracts the `#chapter-content` element, reads a best-effort title from `h1`, `.chapter-title`, or `.chapter h2`, and then sanitizes the HTML.
+The NovelFull extractor extracts the `#chapter-content` element, reads a best-effort title from `h1`, `.chapter-title`, or `.chapter h2`, and then sanitizes the HTML. The other extractors follow the same pattern with source-specific selectors.
 
 ## Adding Another Source
 
