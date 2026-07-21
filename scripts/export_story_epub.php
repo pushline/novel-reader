@@ -95,6 +95,7 @@ $manifest = [
 $spine = [];
 $navItems = [];
 
+$coverMetadata = '';
 $coverPath = dirname(__DIR__).'/public/'.ltrim((string) $story['cover_path'], '/');
 if (is_file($coverPath)) {
     $extension = strtolower(pathinfo($coverPath, PATHINFO_EXTENSION));
@@ -107,7 +108,16 @@ if (is_file($coverPath)) {
     if ($mediaType !== null) {
         $coverName = 'cover.'.$extension;
         $zip->addFile($coverPath, 'EPUB/'.$coverName);
-        $manifest[] = '<item id="cover" href="'.$coverName.'" media-type="'.$mediaType.'" properties="cover-image"/>';
+        $manifest[] = '<item id="cover-image" href="'.$coverName.'" media-type="'.$mediaType.'" properties="cover-image"/>';
+        $coverMetadata = '<meta name="cover" content="cover-image"/>';
+
+        $coverXhtml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+            . '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><title>Cover</title>'
+            . '<link rel="stylesheet" type="text/css" href="style.css"/></head>'
+            . '<body><div style="text-align:center;padding:0;margin:0;"><img src="'.$coverName.'" alt="Cover"/></div></body></html>';
+        $zip->addFromString('EPUB/cover.xhtml', $coverXhtml);
+        $manifest[] = '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>';
+        $spine[] = '<itemref idref="cover" linear="no"/>';
     }
 }
 
@@ -149,8 +159,10 @@ $package = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
     . '<dc:identifier id="book-id">'.$escape($identifier).'</dc:identifier>'
     . '<dc:title>'.$escape((string) $story['title']).'</dc:title>'.$creatorMetadata
     . '<dc:language>en</dc:language><dc:description>'.$escape(strip_tags((string) $story['description'])).'</dc:description>'
-    . '<meta property="dcterms:modified">'.$modified.'</meta></metadata>'
-    . '<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine></package>';
+    . '<meta property="dcterms:modified">'.$modified.'</meta>'.$coverMetadata.'</metadata>'
+    . '<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine>'
+    . ($coverMetadata !== '' ? '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide>' : '')
+    . '</package>';
 $zip->addFromString('EPUB/package.opf', $package);
 $zip->close();
 
