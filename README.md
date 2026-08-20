@@ -34,9 +34,16 @@ php artisan novels:import-from-chapter-chain \
     --story-slug=eternally-regressing-knight \
     --title="Eternally Regressing Knight" \
     --cover-path=covers/eternally-regressing-knight.webp \
+    --author="SoulPung" \
+    --genre=Action --genre=Adventure --genre=Fantasy --genre=Regression \
+    --status=ongoing \
     --start-url="https://revengernovel.com/series/a-knight-who-eternally-regresses/54/chapter-1" \
     --end=1065
 ```
+
+`--author` and `--genre` are repeatable and create the author and genre rows when they are
+missing; authors are attached without detaching existing ones, while the genre list is
+replaced so a rerun cannot leave stale genres behind.
 
 The chapter number comes from the page itself (the source's URL slug is unreliable and can
 disagree with the chapter it serves), and the same `--dry-run`, `--only-missing`, `--force`,

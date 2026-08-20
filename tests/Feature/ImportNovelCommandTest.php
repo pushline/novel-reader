@@ -2,6 +2,7 @@
 
 use App\Models\Chapter;
 use App\Models\Story;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
 it('imports chapter html from a url pattern', function () {
@@ -24,7 +25,7 @@ it('imports chapter html from a url pattern', function () {
     $this->artisan('novels:import-from-url-pattern', [
         '--story-slug' => 'overgeared',
         '--title' => 'Overgeared',
-        '--url-pattern' => 'https://novelfull.com/overgeared/chapter-{chapter}.html',
+        '--url-pattern' => '[https://novelfull.com/overgeared/chapter-{chapter}.html](https://novelfull.com/overgeared/chapter-{chapter}.html)',
         '--start' => 1,
         '--end' => 1,
         '--delay-ms' => 0,
@@ -39,6 +40,9 @@ it('imports chapter html from a url pattern', function () {
         ->and($chapter->content)->not->toContain('iframe')
         ->and($chapter->content)->not->toContain('Buy now')
         ->and($chapter->content)->not->toContain('onclick');
+
+    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://novelfull.com/overgeared/chapter-1.html'
+        && str_starts_with($request->header('User-Agent')[0] ?? '', 'Mozilla/5.0'));
 });
 
 it('does not fetch unsupported source hosts', function () {

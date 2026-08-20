@@ -94,6 +94,52 @@ it('trusts the chapter number on the page over the chapter slug in the url', fun
     expect(Chapter::whereBelongsTo($story)->where('number', 202)->exists())->toBeTrue();
 });
 
+it('registers the author, genres, cover, and status on the story', function () {
+    Http::fake([
+        'revengernovel.com/series/knight/54/chapter-1' => Http::response(revengerChapterPage(1, null, null)),
+    ]);
+
+    $this->artisan('novels:import-from-chapter-chain', [
+        '--story-slug' => 'eternally-regressing-knight',
+        '--title' => 'Eternally Regressing Knight',
+        '--cover-path' => 'covers/eternally-regressing-knight.webp',
+        '--author' => ['SoulPung'],
+        '--genre' => ['Action', 'Adventure', 'Fantasy', 'Regression'],
+        '--status' => 'ongoing',
+        '--start-url' => 'https://revengernovel.com/series/knight/54/chapter-1',
+        '--end' => 1065,
+        '--delay-ms' => 0,
+    ])->assertExitCode(0);
+
+    $story = Story::where('slug', 'eternally-regressing-knight')->firstOrFail();
+
+    expect($story->status)->toBe('ongoing')
+        ->and($story->cover_path)->toBe('covers/eternally-regressing-knight.webp')
+        ->and($story->authors()->pluck('name')->all())->toBe(['SoulPung'])
+        ->and($story->genres()->pluck('name')->sort()->values()->all())
+        ->toBe(['Action', 'Adventure', 'Fantasy', 'Regression']);
+});
+
+it('replaces the genre list instead of appending on a second run', function () {
+    Http::fake([
+        'revengernovel.com/series/knight/54/chapter-1' => Http::response(revengerChapterPage(1, null, null)),
+    ]);
+
+    $options = [
+        '--story-slug' => 'eternally-regressing-knight',
+        '--start-url' => 'https://revengernovel.com/series/knight/54/chapter-1',
+        '--end' => 1065,
+        '--delay-ms' => 0,
+    ];
+
+    $this->artisan('novels:import-from-chapter-chain', $options + ['--genre' => ['Action', 'Harem']])->assertExitCode(0);
+    $this->artisan('novels:import-from-chapter-chain', $options + ['--genre' => ['Action', 'Regression']])->assertExitCode(0);
+
+    $story = Story::where('slug', 'eternally-regressing-knight')->firstOrFail();
+
+    expect($story->genres()->pluck('name')->sort()->values()->all())->toBe(['Action', 'Regression']);
+});
+
 it('does not fetch unsupported source hosts', function () {
     Http::fake();
 

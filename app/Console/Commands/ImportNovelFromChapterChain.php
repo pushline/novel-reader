@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Author;
 use App\Models\Chapter;
+use App\Models\Genre;
 use App\Models\Story;
 use App\Services\ChapterHtmlExtractors\ChapterChainNavigator;
 use App\Services\ChapterHtmlExtractors\ChapterHtmlExtractorManager;
@@ -18,6 +20,9 @@ class ImportNovelFromChapterChain extends Command
         {--story-slug= : Existing or new story slug}
         {--title= : Story title when creating the story}
         {--cover-path= : Public cover path stored on the story, e.g. covers/story.webp}
+        {--author=* : Author name attached to the story, repeatable}
+        {--genre=* : Genre name attached to the story, repeatable}
+        {--status=ongoing : Story status stored on the story}
         {--start-url= : URL of the first chapter to import}
         {--end= : Stop after this chapter number}
         {--delay-ms=1500 : Delay between requests}
@@ -35,7 +40,6 @@ class ImportNovelFromChapterChain extends Command
     {
         $slug = (string) $this->option('story-slug');
         $title = (string) $this->option('title');
-        $coverPath = (string) $this->option('cover-path');
         $startUrl = (string) $this->option('start-url');
         $end = (int) $this->option('end');
         $delayMs = max(0, (int) $this->option('delay-ms'));
@@ -67,14 +71,7 @@ class ImportNovelFromChapterChain extends Command
             return self::FAILURE;
         }
 
-        $story = Story::firstOrCreate(
-            ['slug' => $slug],
-            ['title' => $title !== '' ? $title : Str::headline($slug), 'status' => 'ongoing']
-        );
-
-        if ($coverPath !== '' && $story->cover_path !== $coverPath) {
-            $story->forceFill(['cover_path' => $coverPath])->save();
-        }
+        $story = $this->resolveStory($slug, $title);
 
         $dryRun = (bool) $this->option('dry-run');
         $onlyMissing = (bool) $this->option('only-missing');
@@ -149,6 +146,60 @@ class ImportNovelFromChapterChain extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Create or update the story row, its cover, and its author and genre links
+     * from the command options before any chapter is fetched.
+     */
+    private function resolveStory(string $slug, string $title): Story
+    {
+        $story = Story::firstOrCreate(
+            ['slug' => $slug],
+            ['title' => $title !== '' ? $title : Str::headline($slug), 'status' => 'ongoing']
+        );
+
+        $attributes = array_filter([
+            'cover_path' => (string) $this->option('cover-path'),
+            'status' => (string) $this->option('status'),
+        ], fn (string $value): bool => $value !== '');
+
+        $story->forceFill($attributes)->save();
+
+        $authors = $this->names($this->option('author'));
+
+        if ($authors !== []) {
+            $story->authors()->syncWithoutDetaching(
+                array_map(
+                    fn (string $name): int => Author::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name])->id,
+                    $authors,
+                )
+            );
+        }
+
+        $genres = $this->names($this->option('genre'));
+
+        if ($genres !== []) {
+            $story->genres()->sync(
+                array_map(
+                    fn (string $name): int => Genre::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name])->id,
+                    $genres,
+                )
+            );
+        }
+
+        return $story;
+    }
+
+    /**
+     * @param  mixed  $values
+     * @return list<string>
+     */
+    private function names($values): array
+    {
+        $names = array_map(fn ($value): string => trim((string) $value), is_array($values) ? $values : []);
+
+        return array_values(array_unique(array_filter($names, fn (string $name): bool => $name !== '')));
     }
 
     /**

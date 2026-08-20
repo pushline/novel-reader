@@ -13,6 +13,12 @@ use Illuminate\Support\Str;
 #[Description('Import novel chapters from a numbered URL pattern.')]
 class ImportNovelFromUrlPattern extends Command
 {
+    private const BROWSER_HEADERS = [
+        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language' => 'en-US,en;q=0.9',
+        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    ];
+
     protected $signature = 'novels:import-from-url-pattern
         {--story-slug= : Existing or new story slug}
         {--title= : Story title when creating the story}
@@ -34,7 +40,7 @@ class ImportNovelFromUrlPattern extends Command
     {
         $slug = (string) $this->option('story-slug');
         $title = (string) $this->option('title');
-        $pattern = (string) $this->option('url-pattern');
+        $pattern = $this->normalizeUrlPattern((string) $this->option('url-pattern'));
         $start = (int) $this->option('start');
         $end = (int) $this->option('end');
         $delayMs = max(0, (int) $this->option('delay-ms'));
@@ -80,7 +86,8 @@ class ImportNovelFromUrlPattern extends Command
                     continue;
                 }
 
-                $response = Http::retry($retries, $retryDelayMs)
+                $response = Http::withHeaders(self::BROWSER_HEADERS)
+                    ->retry($retries, $retryDelayMs)
                     ->connectTimeout(20)
                     ->timeout($timeoutSeconds)
                     ->get($url)
@@ -126,5 +133,16 @@ class ImportNovelFromUrlPattern extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function normalizeUrlPattern(string $pattern): string
+    {
+        $pattern = trim($pattern);
+
+        if (preg_match('/^\[([^\]]+)]\(([^)]+)\)$/', $pattern, $matches) === 1 && $matches[1] === $matches[2]) {
+            return $matches[1];
+        }
+
+        return $pattern;
     }
 }
