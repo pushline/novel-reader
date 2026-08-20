@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use DOMElement;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use Symfony\Component\DomCrawler\Crawler;
@@ -15,10 +16,19 @@ class ChapterHtmlSanitizer
         $crawler->filter('script, iframe, style, noscript, .ads, .ad, .advertisement, [class*="ads"], [class*="advert"], [id*="ads"], [id*="advert"]')
             ->each(fn (Crawler $node) => $this->removeNode($node));
 
+        $crawler->filter('p')->each(function (Crawler $node): void {
+            $text = (string) $node->getNode(0)?->textContent;
+            $text = preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', '', $text) ?? $text;
+
+            if ($text === '') {
+                $this->removeNode($node);
+            }
+        });
+
         $crawler->filter('*')->each(function (Crawler $node): void {
             $domNode = $node->getNode(0);
 
-            if (! $domNode || ! $domNode->hasAttributes()) {
+            if (! $domNode instanceof DOMElement || ! $domNode->hasAttributes()) {
                 return;
             }
 

@@ -19,3 +19,21 @@ it('removes unsafe html while preserving chapter paragraphs', function () {
         ->and($html)->not->toContain('iframe')
         ->and($html)->not->toContain('javascript:');
 });
+
+it('removes spacer-only paragraphs while preserving real paragraphs', function () {
+    $html = app(ChapterHtmlSanitizer::class)->sanitize(<<<'HTML'
+        <p>First paragraph.</p>
+        <p>&nbsp;</p>
+        <p> </p>
+        <p> <br> </p>
+        <p><span>&#160;</span></p>
+        <p>Second paragraph.</p>
+        HTML);
+
+    expect($html)->toContain('<p>First paragraph.</p>')
+        ->and($html)->toContain('<p>Second paragraph.</p>')
+        ->and(substr_count($html, '<p>'))->toBe(2)
+        ->and($html)->not->toContain("\u{00A0}")
+        ->and($html)->not->toContain('&nbsp;')
+        ->and($html)->not->toContain('<br');
+});
