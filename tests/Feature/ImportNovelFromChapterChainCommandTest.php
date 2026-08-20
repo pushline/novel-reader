@@ -2,6 +2,7 @@
 
 use App\Models\Chapter;
 use App\Models\Story;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
 function revengerChapterPage(int $number, ?int $nextId, ?int $nextNumber): string
@@ -28,6 +29,66 @@ function revengerChapterPage(int $number, ?int $nextId, ?int $nextNumber): strin
             </body>
         </html>
         HTML;
+}
+
+function webNovelChapterPage(int $number, string $chapterId, ?string $nextId, ?int $nextNumber, bool $locked = false): string
+{
+    $chapterName = "Chapter {$number} - Test title";
+    $data = [
+        'props' => [
+            'pageProps' => [
+                'chapterInfo' => [
+                    'chapterId' => $chapterId,
+                    'chapterName' => $chapterName,
+                    'nextChapterId' => $nextId ?? '',
+                    'nextChapterName' => $nextNumber !== null ? "Chapter {$nextNumber} - Next title" : '',
+                    'vipStatus' => $locked ? 1 : 0,
+                    'price' => $locked ? 10 : 0,
+                    'contents' => [
+                        ['content' => "<p>{$chapterName}</p>"],
+                        ['content' => "<p onclick=\"bad()\">Body of WebNovel chapter {$number}.</p>"],
+                        ['content' => '<script>alert("x")</script>'],
+                    ],
+                ],
+                'bookInfo' => [
+                    'bookId' => '33789555708924705',
+                ],
+            ],
+        ],
+    ];
+
+    return '<html><body><script id="__NEXT_DATA__" type="application/json">'
+        .json_encode($data, JSON_THROW_ON_ERROR)
+        .'</script></body></html>';
+}
+
+function webNovelAnnouncementPage(string $chapterId, string $nextId, int $nextNumber): string
+{
+    $data = [
+        'props' => [
+            'pageProps' => [
+                'chapterInfo' => [
+                    'chapterId' => $chapterId,
+                    'chapterName' => 'Happy New Year To Everyone!',
+                    'nextChapterId' => $nextId,
+                    'nextChapterName' => "Chapter {$nextNumber} - Real chapter",
+                    'vipStatus' => 0,
+                    'price' => 0,
+                    'contents' => [
+                        ['content' => '<p>Happy New Year To Everyone!</p>'],
+                        ['content' => '<p>This is an announcement, not a chapter.</p>'],
+                    ],
+                ],
+                'bookInfo' => [
+                    'bookId' => '33789555708924705',
+                ],
+            ],
+        ],
+    ];
+
+    return '<html><body><script id="__NEXT_DATA__" type="application/json">'
+        .json_encode($data, JSON_THROW_ON_ERROR)
+        .'</script></body></html>';
 }
 
 it('follows the next chapter link across non-sequential chapter ids', function () {
@@ -151,4 +212,88 @@ it('does not fetch unsupported source hosts', function () {
     ])->assertExitCode(1);
 
     Http::assertNothingSent();
+});
+
+it('normalizes a WebNovel URL and follows chapter ids from its page data', function () {
+    Http::fake([
+        'en.webnovel.com/book/33789555708924705/92812975580183896' => Http::response(
+            webNovelChapterPage(731, '92812975580183896', '92839290576361562', 732)
+        ),
+        'en.webnovel.com/book/33789555708924705/92839290576361562' => Http::response(
+            webNovelChapterPage(732, '92839290576361562', '92859833002286737', 733)
+        ),
+    ]);
+
+    $startUrl = 'https://www.webnovel.com/pt/book/eternally-regressing-knight_33789555708924705/'
+        .'chapter-731---imperial-swordsmanship_92812975580183896';
+
+    $this->artisan('novels:import-from-chapter-chain', [
+        '--story-slug' => 'eternally-regressing-knight',
+        '--start-url' => "[{$startUrl}]({$startUrl})",
+        '--end' => 732,
+        '--delay-ms' => 0,
+        '--transport' => 'laravel',
+    ])->assertExitCode(0);
+
+    $story = Story::where('slug', 'eternally-regressing-knight')->firstOrFail();
+    $chapter = Chapter::whereBelongsTo($story)->where('number', 732)->firstOrFail();
+
+    expect(Chapter::whereBelongsTo($story)->count())->toBe(2)
+        ->and($chapter->source_url)->toBe('https://en.webnovel.com/book/33789555708924705/92839290576361562')
+        ->and($chapter->content)->toContain('Body of WebNovel chapter 732.')
+        ->and($chapter->content)->not->toContain('onclick')
+        ->and($chapter->content)->not->toContain('script');
+
+    Http::assertSent(fn (Request $request): bool => str_starts_with($request->header('User-Agent')[0] ?? '', 'Mozilla/5.0'));
+});
+
+it('refuses to import a locked WebNovel chapter', function () {
+    Http::fake([
+        'en.webnovel.com/book/33789555708924705/92859833002286737' => Http::response(
+            webNovelChapterPage(733, '92859833002286737', null, null, locked: true)
+        ),
+    ]);
+
+    $this->artisan('novels:import-from-chapter-chain', [
+        '--story-slug' => 'eternally-regressing-knight',
+        '--start-url' => 'https://en.webnovel.com/book/33789555708924705/92859833002286737',
+        '--end' => 733,
+        '--delay-ms' => 0,
+        '--transport' => 'laravel',
+    ])->expectsOutputToContain('locked or paid')
+        ->assertExitCode(0);
+
+    $story = Story::where('slug', 'eternally-regressing-knight')->firstOrFail();
+
+    expect(Chapter::whereBelongsTo($story)->exists())->toBeFalse();
+});
+
+it('skips unnumbered WebNovel announcements without consuming a chapter number', function () {
+    Http::fake([
+        'en.webnovel.com/book/33789555708924705/93186054156246826' => Http::response(
+            webNovelChapterPage(743, '93186054156246826', '93186134552669579', 744)
+        ),
+        'en.webnovel.com/book/33789555708924705/93186134552669579' => Http::response(
+            webNovelAnnouncementPage('93186134552669579', '93212408478236559', 744)
+        ),
+        'en.webnovel.com/book/33789555708924705/93212408478236559' => Http::response(
+            webNovelChapterPage(744, '93212408478236559', null, null)
+        ),
+    ]);
+
+    $this->artisan('novels:import-from-chapter-chain', [
+        '--story-slug' => 'eternally-regressing-knight',
+        '--start-url' => 'https://en.webnovel.com/book/33789555708924705/93186054156246826',
+        '--end' => 744,
+        '--delay-ms' => 0,
+        '--transport' => 'laravel',
+    ])->expectsOutput("Source entry 'Happy New Year To Everyone!': skip unnumbered content")
+        ->assertExitCode(0);
+
+    $story = Story::where('slug', 'eternally-regressing-knight')->firstOrFail();
+
+    expect(Chapter::whereBelongsTo($story)->count())->toBe(2)
+        ->and(Chapter::whereBelongsTo($story)->where('number', 744)->firstOrFail()->content)
+        ->toContain('Body of WebNovel chapter 744.')
+        ->not->toContain('announcement');
 });

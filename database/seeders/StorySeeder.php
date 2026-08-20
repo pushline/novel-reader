@@ -57,5 +57,29 @@ class StorySeeder extends Seeder
 
         $assassin->authors()->syncWithoutDetaching($assassinAuthor);
         $assassin->genres()->sync($assassinGenres->pluck('id')->all());
+
+        $knight = Story::updateOrCreate(
+            ['slug' => 'eternally-regressing-knight'],
+            [
+                'title' => 'Eternally Regressing Knight',
+                'description' => <<<'TEXT'
+                    "You're a genius." Those words he heard as a child were poison. Enkrid dreamed of becoming a knight, but he soon realized it was futile. "You want to live by the sword with that level of skill?" Some laughed at him. "Just give up." Some advised him against it. Despite that, his dream remained steadfast. He slept less, ran more, and trained harder. One day, he died, having been stabbed in the neck. Enkrid opened his eyes again to "today's" morning.
+                    TEXT,
+                'cover_path' => 'covers/eternally-regressing-knight.webp',
+                'status' => 'ongoing',
+                'source_url' => 'https://revengernovel.com/series/a-knight-who-eternally-regresses',
+                'metadata' => ['source' => 'authorized-import'],
+            ],
+        );
+
+        $knightAuthor = Author::firstOrCreate(['slug' => 'soulpung'], ['name' => 'SoulPung']);
+        $knightGenres = collect(['Action', 'Adventure', 'Fantasy', 'Regression'])
+            ->map(fn (string $name) => Genre::firstOrCreate(
+                ['slug' => str($name)->slug()],
+                ['name' => $name],
+            ));
+
+        $knight->authors()->syncWithoutDetaching($knightAuthor);
+        $knight->genres()->sync($knightGenres->pluck('id')->all());
     }
 }

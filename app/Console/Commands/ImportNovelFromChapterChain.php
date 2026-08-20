@@ -12,10 +12,17 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 #[Description('Import novel chapters by following the next-chapter link on each page.')]
 class ImportNovelFromChapterChain extends Command
 {
+    private const BROWSER_HEADERS = [
+        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language' => 'en-US,en;q=0.9',
+        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    ];
+
     protected $signature = 'novels:import-from-chapter-chain
         {--story-slug= : Existing or new story slug}
         {--title= : Story title when creating the story}
@@ -29,6 +36,7 @@ class ImportNovelFromChapterChain extends Command
         {--timeout-seconds=60 : Per-request timeout}
         {--retries=5 : HTTP attempts per chapter}
         {--retry-delay-ms=2000 : Delay between retry attempts}
+        {--transport=auto : HTTP transport: auto, laravel, or curl}
         {--dry-run : Fetch and parse without saving}
         {--only-missing : Skip saving chapters that already exist}
         {--force : Update even when the import hash is unchanged}';
@@ -40,26 +48,21 @@ class ImportNovelFromChapterChain extends Command
     {
         $slug = (string) $this->option('story-slug');
         $title = (string) $this->option('title');
-        $startUrl = (string) $this->option('start-url');
+        $startUrl = $this->normalizeStartUrl((string) $this->option('start-url'));
         $end = (int) $this->option('end');
         $delayMs = max(0, (int) $this->option('delay-ms'));
         $timeoutSeconds = max(1, (int) $this->option('timeout-seconds'));
         $retries = max(1, (int) $this->option('retries'));
         $retryDelayMs = max(0, (int) $this->option('retry-delay-ms'));
+        $transport = strtolower((string) $this->option('transport'));
 
-        if ($slug === '' || $startUrl === '' || $end < 1) {
-            $this->error('Provide --story-slug, --start-url, and --end.');
+        if ($slug === '' || $startUrl === '' || $end < 1 || ! in_array($transport, ['auto', 'laravel', 'curl'], true)) {
+            $this->error('Provide --story-slug, --start-url, --end, and a valid --transport.');
 
             return self::FAILURE;
         }
 
         $urlTemplate = $this->urlTemplate($startUrl);
-
-        if ($urlTemplate === null) {
-            $this->error('The --start-url must end with a numeric chapter id followed by a chapter slug.');
-
-            return self::FAILURE;
-        }
 
         $extractor = $extractors->extractorFor($startUrl);
 
@@ -91,47 +94,56 @@ class ImportNovelFromChapterChain extends Command
             $visited[$url] = true;
 
             try {
-                $response = Http::retry($retries, $retryDelayMs)
-                    ->connectTimeout(20)
-                    ->timeout($timeoutSeconds)
-                    ->get($url)
-                    ->throw();
-
-                $html = $response->body();
+                $html = $this->fetchChapter($url, $transport, $retries, $retryDelayMs, $timeoutSeconds);
                 $navigation = $extractor->chapterNavigation($html);
-                $number = $navigation['number'] ?? $expectedNumber;
+                $skip = $navigation['skip'] ?? false;
+                $number = $navigation['number'] ?? ($skip ? null : $expectedNumber);
 
-                if ($number === null) {
+                if ($number === null && ! $skip) {
                     $this->error("Could not determine the chapter number for {$url}; stopping.");
 
                     break;
                 }
 
-                if ($number > $end) {
+                if ($number !== null && $number > $end) {
                     break;
                 }
 
-                $this->saveChapter($extractor->extract($html), $story, $number, $url, [
-                    'dry-run' => $dryRun,
-                    'only-missing' => $onlyMissing,
-                    'force' => $force,
-                ]);
+                if ($skip) {
+                    $label = $navigation['label'] ?? $url;
+                    $this->line("Source entry '{$label}': skip unnumbered content");
+                } else {
+                    $this->saveChapter($extractor->extract($html), $story, $number, $url, [
+                        'dry-run' => $dryRun,
+                        'only-missing' => $onlyMissing,
+                        'force' => $force,
+                    ]);
+                }
 
                 $next = $navigation['next'];
 
                 if ($next === null) {
-                    $this->line("Chapter {$number}: no next chapter link; stopping.");
+                    $label = $number !== null ? "Chapter {$number}" : ($navigation['label'] ?? $url);
+                    $this->line("{$label}: no next chapter link; stopping.");
 
                     break;
                 }
 
-                $expectedNumber = $next['number'] ?? $number + 1;
+                $expectedNumber = $next['number'] ?? ($number !== null ? $number + 1 : $expectedNumber);
 
-                if ($expectedNumber > $end) {
+                if ($expectedNumber !== null && $expectedNumber > $end) {
                     break;
                 }
 
-                $url = $this->chapterUrl($urlTemplate, $next['id'], $expectedNumber);
+                if (isset($next['url']) && $next['url'] !== '') {
+                    $url = $next['url'];
+                } elseif ($urlTemplate !== null && $expectedNumber !== null) {
+                    $url = $this->chapterUrl($urlTemplate, $next['id'], $expectedNumber);
+                } else {
+                    $this->error("Chapter {$number}: the source did not provide a usable next chapter URL; stopping.");
+
+                    break;
+                }
             } catch (\Throwable $exception) {
                 $label = $expectedNumber !== null ? "Chapter {$expectedNumber}" : $url;
 
@@ -264,5 +276,98 @@ class ImportNovelFromChapterChain extends Command
     private function chapterUrl(string $template, string $id, int $number): string
     {
         return str_replace(['{id}', '{chapter}'], [$id, (string) $number], $template);
+    }
+
+    private function normalizeStartUrl(string $url): string
+    {
+        $url = trim($url);
+
+        if (preg_match('/^\[([^\]]+)]\(([^)]+)\)$/', $url, $matches) === 1 && $matches[1] === $matches[2]) {
+            $url = $matches[1];
+        }
+
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $path = (string) parse_url($url, PHP_URL_PATH);
+
+        if ($host === 'webnovel.com' || str_ends_with($host, '.webnovel.com')) {
+            if (preg_match('#/book/(\d+)/(\d+)$#', $path, $matches) === 1) {
+                return "https://en.webnovel.com/book/{$matches[1]}/{$matches[2]}";
+            }
+
+            if (preg_match('#_(\d+)/[^/]*_(\d+)$#', $path, $matches) === 1) {
+                return "https://en.webnovel.com/book/{$matches[1]}/{$matches[2]}";
+            }
+        }
+
+        return $url;
+    }
+
+    private function fetchChapter(
+        string $url,
+        string $transport,
+        int $retries,
+        int $retryDelayMs,
+        int $timeoutSeconds,
+    ): string {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $useCurl = $transport === 'curl'
+            || ($transport === 'auto' && ($host === 'webnovel.com' || str_ends_with($host, '.webnovel.com')));
+
+        if ($useCurl) {
+            return $this->fetchWithCurl($url, $retries, $retryDelayMs, $timeoutSeconds);
+        }
+
+        return Http::withHeaders(self::BROWSER_HEADERS)
+            ->retry($retries, $retryDelayMs)
+            ->connectTimeout(20)
+            ->timeout($timeoutSeconds)
+            ->get($url)
+            ->throw()
+            ->body();
+    }
+
+    private function fetchWithCurl(string $url, int $retries, int $retryDelayMs, int $timeoutSeconds): string
+    {
+        $binary = PHP_OS_FAMILY === 'Windows' ? 'curl.exe' : 'curl';
+        $lastError = 'unknown cURL error';
+
+        for ($attempt = 1; $attempt <= $retries; $attempt++) {
+            $process = new Process([
+                $binary,
+                '--location',
+                '--silent',
+                '--show-error',
+                '--fail-with-body',
+                '--connect-timeout',
+                '20',
+                '--max-time',
+                (string) $timeoutSeconds,
+                '--user-agent',
+                self::BROWSER_HEADERS['User-Agent'],
+                '--header',
+                'Accept: '.self::BROWSER_HEADERS['Accept'],
+                '--header',
+                'Accept-Language: '.self::BROWSER_HEADERS['Accept-Language'],
+                $url,
+            ]);
+            $process->setTimeout($timeoutSeconds + 5);
+            $process->run();
+
+            if ($process->isSuccessful()) {
+                return $process->getOutput();
+            }
+
+            $lastError = trim($process->getErrorOutput());
+
+            if ($lastError === '') {
+                $lastError = trim(strip_tags($process->getOutput()));
+            }
+
+            if ($attempt < $retries && $retryDelayMs > 0) {
+                usleep($retryDelayMs * 1000);
+            }
+        }
+
+        throw new \RuntimeException('System cURL request failed: '.Str::limit($lastError, 300));
     }
 }

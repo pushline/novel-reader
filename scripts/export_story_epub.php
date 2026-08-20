@@ -99,11 +99,11 @@ if ($zip->open($output, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
 $escape = static fn (?string $value): string => htmlspecialchars($value ?? '', ENT_XML1 | ENT_QUOTES, 'UTF-8');
 $identifier = 'urn:uuid:'.sprintf(
     '%08s-%04s-4%03s-%04x-%012s',
-    dechex(random_int(0, 0xffffffff)),
-    dechex(random_int(0, 0xffff)),
-    dechex(random_int(0, 0xfff)),
-    random_int(0x8000, 0xbfff),
-    dechex(random_int(0, 0xffffffffffff))
+    dechex(random_int(0, 0xFFFFFFFF)),
+    dechex(random_int(0, 0xFFFF)),
+    dechex(random_int(0, 0xFFF)),
+    random_int(0x8000, 0xBFFF),
+    dechex(random_int(0, 0xFFFFFFFFFFFF))
 );
 $modified = gmdate('Y-m-d\TH:i:s\Z');
 
@@ -147,10 +147,10 @@ foreach ($chapters as $index => $chapter) {
     }
 
     $body = preg_replace('/<\/?(?:html|head|body)[^>]*>/i', '', (string) $chapter['content']) ?? '';
-    $xhtml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-        . '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><title>'.$escape($title)
-        . '</title><link rel="stylesheet" type="text/css" href="style.css"/></head><body><h1>'
-        . $escape($title).'</h1>'.$body.'</body></html>';
+    $xhtml = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+        .'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><title>'.$escape($title)
+        .'</title><link rel="stylesheet" type="text/css" href="style.css"/></head><body><h1>'
+        .$escape($title).'</h1>'.$body.'</body></html>';
 
     $zip->addFromString('EPUB/'.$file, $xhtml);
     $manifest[] = '<item id="'.$id.'" href="'.$file.'" media-type="application/xhtml+xml"/>';
@@ -158,10 +158,10 @@ foreach ($chapters as $index => $chapter) {
     $navItems[] = '<li><a href="'.$file.'">'.$escape($title).'</a></li>';
 }
 
-$nav = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-    . '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en">'
-    . '<head><title>Contents</title><link rel="stylesheet" type="text/css" href="style.css"/></head>'
-    . '<body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>'.implode('', $navItems).'</ol></nav></body></html>';
+$nav = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+    .'<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en">'
+    .'<head><title>Contents</title><link rel="stylesheet" type="text/css" href="style.css"/></head>'
+    .'<body><nav epub:type="toc" id="toc"><h1>Contents</h1><ol>'.implode('', $navItems).'</ol></nav></body></html>';
 $zip->addFromString('EPUB/nav.xhtml', $nav);
 
 $creatorMetadata = '';
@@ -169,14 +169,14 @@ foreach ($authors as $author) {
     $creatorMetadata .= '<dc:creator>'.$escape((string) $author).'</dc:creator>';
 }
 
-$package = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-    . '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
-    . '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
-    . '<dc:identifier id="book-id">'.$escape($identifier).'</dc:identifier>'
-    . '<dc:title>'.$escape((string) $story['title']).'</dc:title>'.$creatorMetadata
-    . '<dc:language>en</dc:language><dc:description>'.$escape(strip_tags((string) $story['description'])).'</dc:description>'
-    . '<meta property="dcterms:modified">'.$modified.'</meta>'.$coverMetadata.'</metadata>'
-    . '<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine></package>';
+$package = '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+    .'<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">'
+    .'<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
+    .'<dc:identifier id="book-id">'.$escape($identifier).'</dc:identifier>'
+    .'<dc:title>'.$escape((string) $story['title']).'</dc:title>'.$creatorMetadata
+    .'<dc:language>en</dc:language><dc:description>'.$escape(strip_tags((string) $story['description'])).'</dc:description>'
+    .'<meta property="dcterms:modified">'.$modified.'</meta>'.$coverMetadata.'</metadata>'
+    .'<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine></package>';
 $zip->addFromString('EPUB/package.opf', $package);
 $zip->close();
 

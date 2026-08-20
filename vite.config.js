@@ -6,13 +6,20 @@ import laravel from 'laravel-vite-plugin';
 import { bunny, google } from 'laravel-vite-plugin/fonts';
 import tailwindcss from "@tailwindcss/vite";
 
-const lanHost = Object.values(networkInterfaces())
+const lanAddresses = Object.values(networkInterfaces())
     .flat()
-    .find((address) =>
+    .filter((address) =>
         address?.family === 'IPv4'
         && !address.internal
         && /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(address.address)
-    )?.address ?? 'localhost';
+    )
+    .map((address) => address.address);
+
+const lanHost = process.env.VITE_DEV_HOST
+    ?? lanAddresses.find((address) => address.startsWith('192.168.'))
+    ?? lanAddresses.find((address) => address.startsWith('10.'))
+    ?? lanAddresses[0]
+    ?? 'localhost';
 
 export default defineConfig({
     plugins: [

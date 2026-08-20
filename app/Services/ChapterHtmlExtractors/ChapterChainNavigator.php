@@ -10,7 +10,12 @@ namespace App\Services\ChapterHtmlExtractors;
 interface ChapterChainNavigator
 {
     /**
-     * @return array{number: int|null, next: array{id: string, number: int|null}|null}
+     * @return array{
+     *     number: int|null,
+     *     next: array{id: string, number: int|null, url?: string}|null,
+     *     skip?: bool,
+     *     label?: string
+     * }
      */
     public function chapterNavigation(string $html): array;
 }

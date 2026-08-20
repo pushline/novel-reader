@@ -7,6 +7,7 @@ use App\Services\ChapterHtmlExtractors\NovelFullChapterHtmlExtractor;
 use App\Services\ChapterHtmlExtractors\NovelLunarChapterHtmlExtractor;
 use App\Services\ChapterHtmlExtractors\NovelTranslationChapterHtmlExtractor;
 use App\Services\ChapterHtmlExtractors\RevengerNovelChapterHtmlExtractor;
+use App\Services\ChapterHtmlExtractors\WebNovelChapterHtmlExtractor;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
             $app->make(NovelLunarChapterHtmlExtractor::class),
             $app->make(NovelTranslationChapterHtmlExtractor::class),
             $app->make(RevengerNovelChapterHtmlExtractor::class),
+            $app->make(WebNovelChapterHtmlExtractor::class),
         ]));
     }
 
