@@ -11,13 +11,18 @@ class ChapterHtmlExtractorManager
 
     public function supports(string $url): bool
     {
+        return $this->extractorFor($url) !== null;
+    }
+
+    public function extractorFor(string $url): ?ChapterHtmlExtractor
+    {
         foreach ($this->extractors as $extractor) {
             if ($extractor->supports($url)) {
-                return true;
+                return $extractor;
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -25,10 +30,10 @@ class ChapterHtmlExtractorManager
      */
     public function extract(string $url, string $html): array
     {
-        foreach ($this->extractors as $extractor) {
-            if ($extractor->supports($url)) {
-                return $extractor->extract($html);
-            }
+        $extractor = $this->extractorFor($url);
+
+        if ($extractor !== null) {
+            return $extractor->extract($html);
         }
 
         $host = parse_url($url, PHP_URL_HOST) ?: 'unknown host';

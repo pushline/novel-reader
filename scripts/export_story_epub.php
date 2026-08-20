@@ -48,6 +48,44 @@ if ($chapters === []) {
     exit(1);
 }
 
+$coverPath = dirname(__DIR__).'/public/'.ltrim((string) $story['cover_path'], '/');
+if (! is_file($coverPath)) {
+    throw new RuntimeException("Cover image was not found for story {$storyId}: {$coverPath}");
+}
+
+if (! function_exists('imagecreatefromstring') || ! function_exists('imagejpeg')) {
+    throw new RuntimeException('The GD extension is required to create a Kindle-compatible JPEG cover.');
+}
+
+$coverContents = file_get_contents($coverPath);
+$coverImage = $coverContents === false ? false : @imagecreatefromstring($coverContents);
+if ($coverImage === false) {
+    throw new RuntimeException("Cover image could not be decoded for story {$storyId}: {$coverPath}");
+}
+
+$sourceWidth = imagesx($coverImage);
+$sourceHeight = imagesy($coverImage);
+$scale = max($sourceWidth, $sourceHeight) < 1200 ? 1200 / max($sourceWidth, $sourceHeight) : 1;
+$coverWidth = (int) round($sourceWidth * $scale);
+$coverHeight = (int) round($sourceHeight * $scale);
+$jpegCover = imagecreatetruecolor($coverWidth, $coverHeight);
+if ($jpegCover === false) {
+    throw new RuntimeException('Could not allocate memory for the Kindle cover image.');
+}
+
+imagefill($jpegCover, 0, 0, imagecolorallocate($jpegCover, 255, 255, 255));
+imagecopyresampled($jpegCover, $coverImage, 0, 0, 0, 0, $coverWidth, $coverHeight, $sourceWidth, $sourceHeight);
+unset($coverImage);
+
+ob_start();
+$coverWritten = imagejpeg($jpegCover, null, 92);
+$jpegContents = ob_get_clean();
+unset($jpegCover);
+
+if (! $coverWritten || ! is_string($jpegContents) || $jpegContents === '') {
+    throw new RuntimeException("Cover image could not be converted to JPEG for story {$storyId}.");
+}
+
 $directory = dirname($output);
 if (! is_dir($directory) && ! mkdir($directory, 0777, true) && ! is_dir($directory)) {
     throw new RuntimeException("Could not create output directory: {$directory}");
@@ -95,31 +133,9 @@ $manifest = [
 $spine = [];
 $navItems = [];
 
-$coverMetadata = '';
-$coverPath = dirname(__DIR__).'/public/'.ltrim((string) $story['cover_path'], '/');
-if (is_file($coverPath)) {
-    $extension = strtolower(pathinfo($coverPath, PATHINFO_EXTENSION));
-    $mediaType = match ($extension) {
-        'jpg', 'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'webp' => 'image/webp',
-        default => null,
-    };
-    if ($mediaType !== null) {
-        $coverName = 'cover.'.$extension;
-        $zip->addFile($coverPath, 'EPUB/'.$coverName);
-        $manifest[] = '<item id="cover-image" href="'.$coverName.'" media-type="'.$mediaType.'" properties="cover-image"/>';
-        $coverMetadata = '<meta name="cover" content="cover-image"/>';
-
-        $coverXhtml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-            . '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><title>Cover</title>'
-            . '<link rel="stylesheet" type="text/css" href="style.css"/></head>'
-            . '<body><div style="text-align:center;padding:0;margin:0;"><img src="'.$coverName.'" alt="Cover"/></div></body></html>';
-        $zip->addFromString('EPUB/cover.xhtml', $coverXhtml);
-        $manifest[] = '<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>';
-        $spine[] = '<itemref idref="cover" linear="no"/>';
-    }
-}
+$zip->addFromString('EPUB/cover.jpg', $jpegContents);
+$manifest[] = '<item id="cover-image" href="cover.jpg" media-type="image/jpeg" properties="cover-image"/>';
+$coverMetadata = '<meta name="cover" content="cover-image"/>';
 
 foreach ($chapters as $index => $chapter) {
     $sequence = $index + 1;
@@ -160,9 +176,7 @@ $package = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
     . '<dc:title>'.$escape((string) $story['title']).'</dc:title>'.$creatorMetadata
     . '<dc:language>en</dc:language><dc:description>'.$escape(strip_tags((string) $story['description'])).'</dc:description>'
     . '<meta property="dcterms:modified">'.$modified.'</meta>'.$coverMetadata.'</metadata>'
-    . '<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine>'
-    . ($coverMetadata !== '' ? '<guide><reference type="cover" title="Cover" href="cover.xhtml"/></guide>' : '')
-    . '</package>';
+    . '<manifest>'.implode('', $manifest).'</manifest><spine>'.implode('', $spine).'</spine></package>';
 $zip->addFromString('EPUB/package.opf', $package);
 $zip->close();
 
