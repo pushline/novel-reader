@@ -1,6 +1,20 @@
-﻿# Novel Reader
+# Novel Reader
 
 A Laravel/Livewire novel reader with an importer for chapter HTML.
+
+## Importing Every Novel
+
+Seed all story metadata and import every configured novel with one command:
+
+```bash
+php artisan novels:seedall
+```
+
+The import catalog is stored in `config/novel_imports.php`, including source changes within a
+story. Existing chapters are preserved by default, so the command is safe to rerun. Pass
+`--refresh` to re-fetch them, or use `--dry-run` to fetch and parse without saving chapters.
+Network timing options such as `--delay-ms`, `--retries`, and `--timeout-seconds` apply to all
+imports.
 
 ## Importing Chapters
 
