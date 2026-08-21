@@ -23,6 +23,21 @@ Useful options:
 - `--delay-ms=1500` controls the delay between chapter requests.
 - `--retries=5` and `--retry-delay-ms=2000` control HTTP retry behavior.
 
+## Checking Chapters for Repeated Content
+
+The duplicate checker scans consecutive paragraph blocks without changing chapter content:
+
+```bash
+php artisan novels:check-duplicates \
+    --story-slug=eternally-regressing-knight \
+    --start=1
+```
+
+Use `--end` to limit the chapter range. The default thresholds are five repeated paragraphs
+and 50 words; `--minimum-paragraphs` and `--minimum-words` can make the scan more or less
+sensitive. The command exits unsuccessfully and prints the matching paragraph ranges when it
+finds a suspected duplicate.
+
 ## Importing Chapters Without a Numbered URL
 
 Some sources address chapters by a non-sequential internal id, so the chapter number in the
